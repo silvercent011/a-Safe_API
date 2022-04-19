@@ -1,16 +1,15 @@
-import { Schema, model } from 'mongoose'
+import mongoose from 'mongoose'
+const { Schema } = mongoose
 import { hash } from 'bcrypt'
+import { ratingSchema } from './Rating.js'
 
-const ratingSchema = new Schema({
-
-})
-
-const userSchema = new Schema({
+export const userSchema = new Schema({
     name: { type: String, required: true },
     surname: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true, select: false },
     birthdate: { type: Date, default: null },
+    phone: { type: Number, default: null },
     ratings: [ratingSchema]
 }, { timestamps: { createdAt: 'created', updatedAt: 'updated' } })
 
@@ -20,6 +19,3 @@ userSchema.pre('save', async function (next) {
     user.password = await hash(user.password, 10);
     return next()
 })
-
-export const User = model('User', userSchema, 'users')
-
