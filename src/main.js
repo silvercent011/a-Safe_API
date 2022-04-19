@@ -3,7 +3,6 @@ import express, { json, urlencoded } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import mongoose from 'mongoose'
-import { Contractor } from './models/Contractor.js'
 
 //Express
 const App = express()
@@ -24,6 +23,10 @@ mongoose.connect(url, { dbName: database }, () => console.log('MongoDB Connected
 App.get('/', (req, res) => {
     res.json({ status: 'Server is running!' })
 })
+//Users
+import { UsersRouter } from './routes/users.js'
+App.use('/users', UsersRouter)
+
 //Server
 const PORT = configuration.port || 1010;
 App.listen(PORT, () => {
