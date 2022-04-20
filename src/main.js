@@ -6,10 +6,11 @@ import mongoose from 'mongoose'
 
 //Express
 const App = express()
-App.use(urlencoded({ extended: true }))
-App.use(json())
 //Cors
 App.use(cors())
+//url-encoded - body-parser
+App.use(urlencoded({ extended: true }))
+App.use(json())
 //Helmet
 App.use(helmet())
 
