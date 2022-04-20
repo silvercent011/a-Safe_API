@@ -10,6 +10,10 @@ export const userSchema = new Schema({
     password: { type: String, required: true, select: false },
     birthdate: { type: Date, default: null },
     phone: { type: Number, default: null },
+    lastLocation: {
+        type: { type: String, default: 'Point' },
+        coordinates: { type: [Number], default: [0, 0] }
+    },
     ratings: [ratingSchema]
 }, { timestamps: { createdAt: 'created', updatedAt: 'updated' } })
 
