@@ -9,7 +9,7 @@ const { sign } = jsonwebtoken
 export const UsersRouter = Router()
 
 UsersRouter.post('/contractor/', async (req, res) => {
-    const { storeName, cnpj, name, surname, email, password, birthdate, phone } = req.body
+    const { storeName, cnpj, name, surname, email, password, birthdate, phone, latitude, longitude } = req.body
     if (!storeName, !cnpj, !name, !surname, !email, !password) return res.status(400).send({ error: 'Dados Insuficientes' })
     // Verifica se usuário existe
     const guardData = (await Guard.findOne({ email: email }).select("+password"))
@@ -21,6 +21,7 @@ UsersRouter.post('/contractor/', async (req, res) => {
         data.password = await hash(data.password, 10);
         const contractor = await Contractor.create(data)
         contractor.password = undefined
+        await Contractor.findOneAndUpdate({ _id: contractor._id.toString() }, { lastLocation: { type: "Point", coordinates: [longitude, latitude] } })
         return res.status(201).send(contractor)
     } catch (error) {
         return res.status(400).send({ error: 'Erro ao cadastrar contratante...', mongo: error })
@@ -29,7 +30,7 @@ UsersRouter.post('/contractor/', async (req, res) => {
 })
 
 UsersRouter.post('/guard/', async (req, res) => {
-    const { cpf, name, surname, email, password, birthdate, phone } = req.body
+    const { cpf, name, surname, email, password, birthdate, phone, latitude, longitude } = req.body
     if (!cpf, !name, !surname, !email, !password) return res.status(400).send({ error: 'Dados Insuficientes' })
     // Verifica se usuário existe
     const guardData = (await Guard.findOne({ email: email }).select("+password"))
@@ -41,6 +42,7 @@ UsersRouter.post('/guard/', async (req, res) => {
         data.password = await hash(data.password, 10);
         const guard = await Guard.create(data)
         guard.password = undefined
+        await Guard.findOneAndUpdate({ _id: guard._id.toString() }, { lastLocation: { type: "Point", coordinates: [longitude, latitude] } })
         return res.status(201).send(guard)
     } catch (error) {
         return res.status(400).send({ error: 'Erro ao cadastrar guarda...', mongo: error })
@@ -88,7 +90,7 @@ UsersRouter.post('/auth', async (req, res) => {
 UsersRouter.post('/me', async (req, res) => {
     const token = req.headers.access_token
     const { email, id } = await decodeToken(token)
-    const {latitude, longitude} = req.body
+    const { latitude, longitude } = req.body
     // Verifica se usuário existe
     const guardData = (await Guard.findOne({ _id: id }))
     const contractorData = (await Contractor.findOne({ _id: id }))
