@@ -85,9 +85,10 @@ UsersRouter.post('/auth', async (req, res) => {
 })
 
 
-UsersRouter.get('/me', async (req, res) => {
+UsersRouter.post('/me', async (req, res) => {
     const token = req.headers.access_token
     const { email, id } = await decodeToken(token)
+    const {latitude, longitude} = req.body
     // Verifica se usuário existe
     const guardData = (await Guard.findOne({ _id: id }))
     const contractorData = (await Contractor.findOne({ _id: id }))
