@@ -3,7 +3,9 @@ import { Contractor } from "../models/Contractor.js";
 import { Guard } from "../models/Guard.js";
 import { compare, hash } from "bcrypt";
 import jsonwebtoken from 'jsonwebtoken';
+import { decodeToken } from '../utils/decode_token.js';
 const { sign } = jsonwebtoken
+
 export const UsersRouter = Router()
 
 UsersRouter.post('/contractor/', async (req, res) => {
@@ -80,4 +82,40 @@ UsersRouter.post('/auth', async (req, res) => {
     } catch (error) {
         return res.status(400).send({ error: "Não foi possível logar" })
     }
+})
+
+
+UsersRouter.get('/me', async (req, res) => {
+    const token = req.headers.access_token
+    const { email, id } = await decodeToken(token)
+    // Verifica se usuário existe
+    const guardData = (await Guard.findOne({ _id: id }))
+    const contractorData = (await Contractor.findOne({ _id: id }))
+    try {
+
+        //Verifica Usuário não encontrado
+        if (!guardData && !contractorData) return res.status(400).send({ error: "Usuário não encontrado" })
+
+        const userData = guardData ? guardData : contractorData
+
+        let update = undefined
+        if (guardData) {
+            update = await Guard.findOneAndUpdate({ _id: userData._id.toString() }, { lastLocation: { type: "Point", coordinates: [longitude, latitude] } })
+        } else {
+            update = await Contractor.findOneAndUpdate({ _id: userData._id.toString() }, { lastLocation: { type: "Point", coordinates: [longitude, latitude] } })
+        }
+
+        //Adiciona token
+        const addictParams = {
+            token: sign({ email: email, id: update._id.toString() }, process.env.JWT_SECRET, { expiresIn: "6h" })
+        }
+        //Zera senha da resposta
+        update.password = undefined;
+        //Retorna
+        return res.status(200).send({ ...update.toObject(), ...addictParams })
+
+    } catch (error) {
+        return res.status(400).send({ error: "Erro ao obter dados" })
+    }
+
 })
