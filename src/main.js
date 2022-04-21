@@ -19,6 +19,8 @@ const url = configuration.mongo_string
 const database = configuration.mongo_database
 mongoose.connect(url, { dbName: database }, () => console.log('MongoDB Connected'))
 
+//JWT
+import { authjson } from './utils/jwt_auth.js'
 
 //Index
 App.get('/', (req, res) => {
@@ -27,6 +29,11 @@ App.get('/', (req, res) => {
 //Users
 import { UsersRouter } from './routes/users.js'
 App.use('/users', UsersRouter)
+
+//Guards
+import { GuardsRouter } from './routes/guards.js'
+App.use('/guards', authjson, GuardsRouter)
+
 
 //Server
 const PORT = configuration.port || 1010;

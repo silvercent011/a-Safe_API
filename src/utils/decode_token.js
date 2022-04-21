@@ -1,4 +1,5 @@
-import { verify } from 'jsonwebtoken';
+import jsonwebtoken from "jsonwebtoken";
+const { verify } = jsonwebtoken
 
 export async function decodeToken(token) {
     const tokenFromHeader = await token

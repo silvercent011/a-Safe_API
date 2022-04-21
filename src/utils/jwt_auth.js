@@ -1,5 +1,5 @@
-import { verify } from "jsonwebtoken";
-
+import jsonwebtoken from "jsonwebtoken";
+const { verify } = jsonwebtoken
 export const authjson = async (req, res, next) => {
     const tokenFromHeader = req.headers.access_token
     const secret = process.env.JWT_SECRET
