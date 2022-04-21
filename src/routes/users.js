@@ -85,6 +85,41 @@ UsersRouter.post('/auth', async (req, res) => {
         return res.status(400).send({ error: "Não foi possível logar" })
     }
 })
+UsersRouter.patch('/me', async (req, res) => {
+    const token = req.headers.access_token
+    const { email, id } = await decodeToken(token)
+    const { longitude, latitude } = req.body;
+    if (!email || !password) return res.status(400).send({ error: "Dados insuficientes" })
+    // Verifica se usuário existe
+    const guardData = (await Guard.findOne({ _id: id }).select("+password"))
+    const contractorData = (await Contractor.findOne({ _id: id }).select("+password"))
+    try {
+        //Verifica Usuário não encontrado
+        if (!guardData && !contractorData) return res.status(400).send({ error: "Usuário não encontrado" })
+        //Define usuário
+        const userData = guardData ? guardData : contractorData
+        let update = undefined
+        if (guardData) {
+            update = await Guard.findOneAndUpdate({ _id: userData._id.toString() }, { lastLocation: { type: "Point", coordinates: [longitude, latitude] } })
+            update = await Guard.findOneAndUpdate({ _id: userData._id.toString() }, req.body)
+        } else {
+            update = await Contractor.findOneAndUpdate({ _id: userData._id.toString() }, req.body)
+        }
+
+
+        //Adiciona token
+        const addictParams = {
+            token: sign({ email: email, id: update._id.toString() }, process.env.JWT_SECRET, { expiresIn: "6h" })
+        }
+        //Zera senha da resposta
+        update.password = undefined;
+        //Retorna
+        return res.status(200).send({ ...update.toObject(), ...addictParams })
+
+    } catch (error) {
+        return res.status(400).send({ error: "Não foi possível logar" })
+    }
+})
 
 
 UsersRouter.post('/me', async (req, res) => {
