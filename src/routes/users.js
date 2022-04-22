@@ -89,7 +89,7 @@ UsersRouter.patch('/me', async (req, res) => {
     const token = req.headers.access_token
     const { email, id } = await decodeToken(token)
     const { longitude, latitude } = req.body;
-    if (!email || !password) return res.status(400).send({ error: "Dados insuficientes" })
+    if (!email) return res.status(400).send({ error: "Dados insuficientes" })
     // Verifica se usuário existe
     const guardData = (await Guard.findOne({ _id: id }).select("+password"))
     const contractorData = (await Contractor.findOne({ _id: id }).select("+password"))
